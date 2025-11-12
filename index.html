@@ -2,25 +2,113 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Гуртожиток №11</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
     <style>
-        /* Стилі, щоб "Hello World" був гарним */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+        body, html {
+            height: 100%;
             margin: 0;
-            /* Колір фону можна буде брати з Telegram */
-            background-color: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #333;
+            color: #fff;
+            overflow: hidden;
+            user-select: none;
         }
+
+        .status-bar {
+            position: fixed;
+            top: 15px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
+
+        .stat {
+            width: 20%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* ❗️ КРОК 2: Ми стилізуємо не <img>, а тег <i> (іконку) */
+        .stat-icon {
+            /* Ми просто міняємо розмір шрифту */
+            font-size: 30px; 
+            /* Іконки вже білі, але ми можемо керувати кольором */
+            color: #ffffff; 
+            /* Додамо тінь, як ми і хотіли */
+            text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+            
+            /* Це важливо, щоб усі іконки займали однакове місце по висоті */
+            height: 32px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-bar-background {
+            width: 100%;
+            height: 6px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 3px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        
+        .stat-bar-progress {
+            width: 50%;
+            height: 100%;
+            background-color: #f0f0f0;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
     </style>
 </head>
 <body>
-    <h1>Hello, World! 🌍</h1>
+
+    <div class="status-bar">
+        
+        <div class="stat" id="stat-study">
+            <i class="stat-icon fa-solid fa-brain"></i>
+            <div class="stat-bar-background">
+                <div class="stat-bar-progress" style="width: 50%;"></div>
+            </div>
+        </div>
+
+        <div class="stat" id="stat-energy">
+            <i class="stat-icon fa-solid fa-bolt"></i>
+            <div class="stat-bar-background">
+                <div class="stat-bar-progress" style="width: 50%;"></div>
+            </div>
+        </div>
+
+        <div class="stat" id="stat-money">
+            <i class="stat-icon fa-solid fa-hryvnia-sign"></i>
+            <div class="stat-bar-background">
+                <div class="stat-bar-progress" style="width: 50%;"></div>
+            </div>
+        </div>
+
+        <div class="stat" id="stat-rep">
+            <i class="stat-icon fa-solid fa-users"></i>
+            <div class="stat-bar-background">
+                <div class="stat-bar-progress" style="width: 50%;"></div>
+            </div>
+        </div>
+
+    </div>
+    
+    <script>
+        window.Telegram.WebApp.ready();
+    </script>
 </body>
 </html>
