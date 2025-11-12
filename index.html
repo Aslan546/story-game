@@ -38,10 +38,10 @@
             align-items: center;
         }
 
-        /* ❗️ НОВИЙ СТИЛЬ: Контейнер для іконки */
+        /* Контейнер для накладання іконок */
         .stat-icon-container {
             position: relative; /* База для нашарування */
-            font-size: 40px; /* ЗБІЛЬШИЛИ ІКОНКИ */
+            font-size: 40px; /* Великі іконки */
             height: 42px; /* Фіксована висота */
             width: 100%;
             display: flex;
@@ -49,39 +49,28 @@
             justify-content: center;
         }
 
-        /* ❗️ НОВИЙ СТИЛЬ: Іконка заднього фону (сіра) */
+        /* ❗️ НОВИЙ СТИЛЬ: Базова іконка (сіра) */
         .stat-icon-bg {
-            color: #555; /* Темно-сірий, як "порожній" стан */
+            color: #555; /* Темно-сірий "порожній" стан */
             text-shadow: 0 1px 1px rgba(0,0,0,0.5);
-            position: absolute; /* Всі іконки в одній точці */
+            /* Вона лежить на задньому плані */
+            position: absolute;
         }
 
-        /* ❗️ НОВИЙ СТИЛЬ: "Кліпер" - div, який обрізає білу іконку */
-        .stat-icon-fg-clipper {
-            position: absolute;
-            bottom: 0; /* Починаємо заповнення ЗНИЗУ */
-            left: 0;
-            width: 100%;
-            height: 50%; /* ЦЕ І Є НАШ СТАТ (зараз 50%) */
-            overflow: hidden; /* МАГІЯ: все, що вище, ховається */
-            transition: height 0.3s ease; /* Плавна анімація */
-        }
-        
-        /* ❗️ НОВИЙ СТИЛЬ: Іконка переднього фону (біла) */
+        /* ❗️ НОВИЙ СТИЛЬ: Іконка переднього плану (біла) */
         .stat-icon-fg {
             color: #ffffff; /* Яскраво-білий "заповнений" стан */
             text-shadow: 0 1px 1px rgba(0,0,0,0.5);
             
-            /* Важливо: ця іконка має ідеально 
-               співпадати з сірою під нею */
+            /* Вона лежить ІДЕАЛЬНО поверх сірої */
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+
+            /* ❗️ МАГІЯ: Ми "відрізаємо" 50% ВЕРХНЬОЇ частини */
+            /* Це покаже нижні 50% */
+            clip-path: inset(50% 0 0 0); /* (top, right, bottom, left) */
+            
+            /* Ми будемо анімувати 'clip-path' через JavaScript */
+            transition: clip-path 0.3s ease;
         }
 
     </style>
@@ -93,36 +82,28 @@
         <div class="stat" id="stat-study">
             <div class="stat-icon-container">
                 <i class="stat-icon-bg fa-solid fa-brain"></i>
-                <div class="stat-icon-fg-clipper" style="height: 50%;">
-                    <i class="stat-icon-fg fa-solid fa-brain"></i>
-                </div>
+                <i class="stat-icon-fg fa-solid fa-brain"></i>
             </div>
         </div>
 
         <div class="stat" id="stat-energy">
             <div class="stat-icon-container">
                 <i class="stat-icon-bg fa-solid fa-bolt"></i>
-                <div class="stat-icon-fg-clipper" style="height: 50%;">
-                    <i class="stat-icon-fg fa-solid fa-bolt"></i>
-                </div>
+                <i class="stat-icon-fg fa-solid fa-bolt"></i>
             </div>
         </div>
 
         <div class="stat" id="stat-money">
             <div class="stat-icon-container">
                 <i class="stat-icon-bg fa-solid fa-hryvnia-sign"></i>
-                <div class="stat-icon-fg-clipper" style="height: 50%;">
-                    <i class="stat-icon-fg fa-solid fa-hryvnia-sign"></i>
-                </div>
+                <i class="stat-icon-fg fa-solid fa-hryvnia-sign"></i>
             </div>
         </div>
 
         <div class="stat" id="stat-rep">
             <div class="stat-icon-container">
                 <i class="stat-icon-bg fa-solid fa-users"></i>
-                <div class="stat-icon-fg-clipper" style="height: 50%;">
-                    <i class="stat-icon-fg fa-solid fa-users"></i>
-                </div>
+                <i class="stat-icon-fg fa-solid fa-users"></i>
             </div>
         </div>
 
