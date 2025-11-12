@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Гуртожиток №11</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+
     <style>
         body, html {
             height: 100%;
@@ -16,53 +17,46 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             overflow: hidden;
             user-select: none;
-            
-            /* ❗️ НОВА СТРУКТУРА: Ділимо екран на 3 частини */
             display: flex;
             flex-direction: column;
+            background-color: #444; /* Сірий фон тепер на body */
         }
 
-        /* ❗️ ЧОРНИЙ ВЕРХНІЙ БАР */
+        /* --- БАР СТАТІВ (змінив фон) --- */
         .status-bar {
-            background-color: #1c1c1c; /* Майже чорний, як у Lapse */
+            background-color: #1c1c1c;
             padding: 15px 10px;
             box-sizing: border-box;
-            
-            /* Старий код для розміщення статів */
             display: flex;
             justify-content: space-around;
             position: relative;
             z-index: 10;
         }
-        
-        /* --- (Стилі для статів не змінилися) --- */
         .stat { width: 20%; display: flex; flex-direction: column; align-items: center; }
         .stat-icon-container { position: relative; font-size: 40px; height: 42px; width: 100%; display: flex; align-items: center; justify-content: center; }
         .stat-icon-bg { color: #555; text-shadow: 0 1px 1px rgba(0,0,0,0.5); position: absolute; }
         .stat-icon-fg { color: #ffffff; text-shadow: 0 1px 1px rgba(0,0,0,0.5); position: absolute; clip-path: inset(50% 0 0 0); transition: clip-path 0.3s ease; }
 
 
-        /* ❗️ СІРА ГОЛОВНА СЦЕНА */
+        /* --- ГОЛОВНА СЦЕНА (без змін) --- */
         .content-area {
-            flex: 1; /* Займає весь вільний простір */
-            background-color: #444; /* Cірий фон, як у Lapse */
+            flex: 1;
             padding: 20px;
             box-sizing: border-box;
-            
-            /* Центруємо весь контент (повідомлення, картка, ім'я) */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            position: relative; /* Важливо для .card-stack */
+            width: 100%;
         }
 
-        /* Повідомлення (НАД карткою) */
         .message-text {
             font-size: 22px;
             font-weight: 500;
             text-align: center;
             color: #f0f0f0;
-            margin-bottom: 20px; /* Відступ до картки */
+            margin-bottom: 20px;
             width: 100%;
             max-width: 340px;
         }
@@ -70,60 +64,65 @@
         /* "Колода" карток */
         .card-stack {
             position: relative;
-            /* Розміри самої картки-аватара */
             width: 85vw; 
             max-width: 340px;
-            height: 45vh; /* Зробимо її вищою, щоб помістився аватар */
+            height: 45vh;
             max-height: 400px;
         }
 
-        /* Картка (ТЕПЕР ЦЕ ЛИШЕ АВАТАР) */
+        /* Картка */
         .card {
             position: absolute;
             width: 100%;
             height: 100%;
-            
-            /* ❗️ КОЛІР ПЕРСОНАЖА (як зелений у Lapse) */
-            background-color: #3a4a44; /* Тестовий темно-зелений */
-            
+            background-color: #3a4a44; /* Колір персонажа */
             border-radius: 20px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
             
-            /* Центруємо аватар всередині */
+            /* ❗️ Важливо для 'interact.js' */
+            touch-action: none; /* Дозволяє нам керувати свайпом */
+            
+            /* ❗️ Плавне повернення картки на місце */
+            transition: transform 0.3s ease-out;
+
+            /* Центруємо аватар */
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden; /* Ховаємо те, що вилазить за межі */
+        }
+        
+        /* ❗️ Стиль для картки, коли ми її тягнемо */
+        .card.is-dragging {
+             /* Прибираємо плавний перехід, щоб вона миттєво слідувала за пальцем */
+            transition: none;
         }
 
-        /* Аватар персонажа (тимчасовий) */
+        /* Аватар персонажа (тепер це <img>) */
         .card-avatar {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            background-color: #222; /* Темний круг */
-            border: 5px solid #f0f0f0;
+            width: 100%; /* Займає всю ширину картки */
+            height: 100%; /* і висоту */
+            object-fit: cover; /* Масштабує, щоб заповнити, але не спотворити */
         }
 
-        /* Ім'я персонажа (ПІД карткою) */
         .character-name {
             font-size: 18px;
             font-weight: bold;
             text-align: center;
             color: #f0f0f0;
-            margin-top: 15px; /* Відступ від картки */
+            margin-top: 15px;
         }
 
 
-        /* ❗️ ЧОРНИЙ НИЖНІЙ БАР (Футер) */
+        /* --- НИЖНІЙ БАР (без змін) --- */
         .footer-bar {
-            background-color: #1c1c1c; /* Такий самий, як верхній */
+            background-color: #1c1c1c;
             padding: 15px;
             box-sizing: border-box;
             text-align: center;
             position: relative;
             z-index: 10;
         }
-        
         .day-counter {
             font-size: 16px;
             font-weight: bold;
@@ -143,29 +142,105 @@
     
     <main class="content-area">
 
-        <p class="message-text">
+        <p class="message-text" id="message-text">
             Привіт! Ти ж новенький з 404А?
         </p>
 
         <div class="card-stack">
-            <div class="card">
-                <div class="card-avatar"></div> </div>
+            <div class="card" id="current-card">
+                <img src="avatar_andriy.png" alt="Андрій" class="card-avatar">
+            </div>
         </div>
 
-        <p class="character-name">
+        <p class="character-name" id="character-name">
             Андрій (Сусід)
         </p>
 
     </main>
 
     <footer class="footer-bar">
-        <div class="day-counter">
+        <div class="day-counter" id="day-counter">
             1 вересня
         </div>
     </footer>
     
     <script>
+        // Ініціалізуємо зв'язок з Telegram
         window.Telegram.WebApp.ready();
+        
+        // --- Налаштування гри ---
+        // Отримуємо доступ до елементів
+        const card = document.getElementById('current-card');
+        
+        // Зберігаємо позицію картки
+        let x = 0;
+        let y = 0;
+
+        // --- Логіка Свайпу (interact.js) ---
+        interact(card)
+            .draggable({
+                // Дозволяємо тягнути в усіх напрямках
+                inertia: true, // Додає ефект "польоту"
+                modifiers: [
+                    interact.modifiers.restrictRect({
+                        restriction: 'parent', // Не дає вилетіти за межі "колоди" (поки що)
+                        endOnly: true
+                    })
+                ],
+                autoScroll: false,
+                
+                // Коли ми починаємо тягнути
+                onstart: function (event) {
+                    event.target.classList.add('is-dragging');
+                },
+
+                // Коли ми тягнемо картку
+                onmove: function (event) {
+                    const target = event.target;
+                    
+                    // Оновлюємо позицію
+                    x += event.dx;
+                    y += event.dy;
+
+                    // Рухаємо картку + трохи нахиляємо її
+                    const rotate = x * 0.05; // 0.05 градуса на 1 піксель зсуву
+                    
+                    target.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${rotate}deg)`;
+                },
+
+                // Коли ми відпускаємо картку
+                onend: function (event) {
+                    const target = event.target;
+                    target.classList.remove('is-dragging');
+
+                    // ❗️ ЛОГІКА РІШЕННЯ (поки проста)
+                    // Якщо ми "кинули" картку досить далеко
+                    const swipeThreshold = 100; // 100 пікселів
+                    
+                    if (Math.abs(x) > swipeThreshold) {
+                        // Картка "відлітає"
+                        const direction = x > 0 ? 1 : -1; // 1 = вправо, -1 = вліво
+                        target.style.transform = `translate3d(${direction * 1000}px, ${y}px, 0) rotate(${direction * 60}deg)`;
+                        
+                        // TODO: Тут ми будемо завантажувати нову картку
+                        console.log(`Рішення: ${direction > 0 ? 'ВПРАВО' : 'ВЛІВО'}`);
+                        
+                        // Повертаємо картку на місце (для тесту) через 1с
+                        setTimeout(() => {
+                            x = 0;
+                            y = 0;
+                            target.style.transform = 'translate3d(0, 0, 0) rotate(0deg)';
+                        }, 1000);
+
+                    } else {
+                        // Повертаємо картку на місце, якщо "кинули" недостатньо далеко
+                        x = 0;
+                        y = 0;
+                        target.style.transform = 'translate3d(0, 0, 0) rotate(0deg)';
+                    }
+                }
+            });
+
     </script>
 </body>
 </html>
