@@ -6,7 +6,8 @@
     <title>Гуртожиток №11</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
 
     <style>
         body, html {
@@ -19,55 +20,20 @@
             display: flex;
             flex-direction: column;
             background-color: #444;
-            touch-action: none; /* Залишаємо це як додатковий захист */
+            touch-action: none;
         }
 
-        /* --- БАР СТАТІВ --- */
-        .status-bar {
-            background-color: #1c1c1c;
-            padding: 15px 10px;
-            box-sizing: border-box;
-            display: flex;
-            justify-content: space-around;
-            position: relative;
-            z-index: 10;
-        }
+        /* --- БАР СТАТІВ (без змін) --- */
+        .status-bar { background-color: #1c1c1c; padding: 15px 10px; box-sizing: border-box; display: flex; justify-content: space-around; position: relative; z-index: 10; }
         .stat { width: 20%; display: flex; flex-direction: column; align-items: center; }
         .stat-icon-container { position: relative; font-size: 40px; height: 42px; width: 100%; display: flex; align-items: center; justify-content: center; }
         .stat-icon-bg { color: #555; text-shadow: 0 1px 1px rgba(0,0,0,0.5); position: absolute; }
         .stat-icon-fg { color: #ffffff; text-shadow: 0 1px 1px rgba(0,0,0,0.5); position: absolute; clip-path: inset(50% 0 0 0); transition: clip-path 0.3s ease; }
 
-
-        /* --- ГОЛОВНА СЦЕНА --- */
-        .content-area {
-            flex: 1;
-            padding: 20px 20px 10px 20px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-around; 
-            position: relative;
-            width: 100%;
-        }
-
-        .message-text {
-            font-size: 20px;
-            font-weight: 500;
-            text-align: center;
-            color: #f0f0f0;
-            width: 100%;
-            max-width: 340px;
-        }
-        
-        .card-stack {
-            position: relative;
-            width: 85vw; 
-            max-width: 340px;
-            height: 55vh;
-            max-height: 450px; 
-        }
-
+        /* --- ГОЛОВНА СЦЕННА (без змін) --- */
+        .content-area { flex: 1; padding: 20px 20px 10px 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: space-around; position: relative; width: 100%; }
+        .message-text { font-size: 20px; font-weight: 500; text-align: center; color: #f0f0f0; width: 100%; max-width: 340px; }
+        .card-stack { position: relative; width: 85vw; max-width: 340px; height: 55vh; max-height: 450px; }
         .card {
             position: absolute;
             width: 100%;
@@ -75,7 +41,9 @@
             background-color: #3a4a44; 
             border-radius: 20px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-            touch-action: none; /* Забороняємо браузеру чіпати картку */
+            /* ❗️ ВАЖЛИВО: Hammer.js вимагає цього */
+            touch-action: pan-y;
+            
             transition: transform 0.3s ease-out;
             display: flex;
             align-items: center;
@@ -83,32 +51,27 @@
             overflow: hidden; 
         }
         .card.is-dragging { transition: none; }
-        .card-avatar {
+        .card-avatar { width: 100%; height: 100%; object-fit: cover; }
+        .character-name { font-size: 18px; font-weight: bold; text-align: center; color: #f0f0f0; }
+
+        /* --- НИЖНІЙ БАР (без змін) --- */
+        .footer-bar { background-color: #1c1c1c; padding: 15px; box-sizing: border-box; text-align: center; position: relative; z-index: 10; }
+        .day-counter { font-size: 16px; font-weight: bold; color: #f0f0f0; }
+
+        /* ❗️ КРОК 2: ДОДАЄМО СТИЛІ ДЛЯ ДЕБАГ-ЛОГУ */
+        #debug-log {
+            position: fixed;
+            bottom: 60px; /* Над футером */
+            left: 0;
             width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .character-name {
-            font-size: 18px;
-            font-weight: bold;
+            background: rgba(0,0,0,0.5);
+            color: #fff;
+            font-size: 12px;
+            padding: 5px;
+            z-index: 999;
             text-align: center;
-            color: #f0f0f0;
-        }
-
-        /* --- НИЖНІЙ БАР --- */
-        .footer-bar {
-            background-color: #1c1c1c;
-            padding: 15px;
-            box-sizing: border-box;
-            text-align: center;
-            position: relative;
-            z-index: 10;
-        }
-        .day-counter {
-            font-size: 16px;
-            font-weight: bold;
-            color: #f0f0f0;
+            font-family: monospace;
+            display: none; /* Ми ввімкнемо його, якщо захочемо */
         }
 
     </style>
@@ -123,93 +86,111 @@
     </header>
     
     <main class="content-area">
-
-        <p class="message-text" id="message-text">
-            Привіт! Ти ж новенький з 404А?
-        </p>
-
+        <p class="message-text" id="message-text">Привіт! Ти ж новенький з 404А?</p>
         <div class="card-stack">
             <div class="card" id="current-card">
                 <img src="avatar_andriy.png" alt="Андрій" class="card-avatar">
             </div>
         </div>
-
-        <p class="character-name" id="character-name">
-            Андрій (Сусід)
-        </p>
-
+        <p class="character-name" id="character-name">Андрій (Сусід)</p>
     </main>
 
     <footer class="footer-bar">
-        <div class="day-counter" id="day-counter">
-            1 вересня
-        </div>
+        <div class="day-counter" id="day-counter">1 вересня</div>
     </footer>
     
+    <div id="debug-log">[Логи]</div>
+
     <script>
         window.Telegram.WebApp.ready();
         
         const card = document.getElementById('current-card');
+        const debugLog = document.getElementById('debug-log');
+
+        // ❗️ Вмикаємо дебаг-панель
+        debugLog.style.display = 'block';
+
+        // Функція для логування на екран
+        function logToScreen(message) {
+            debugLog.textContent = message;
+        }
+
+        logToScreen('Hammer.js завантажено. Чекаю на дотик...');
+
+        // Зберігаємо початкову позицію
+        let startX = 0;
+        let startY = 0;
         
-        // ❗️ ФІКС UX №1: Повертаємо 'y'
-        let x = 0;
-        let y = 0;
+        // Зберігаємо поточну позицію
+        let currentX = 0;
+        let currentY = 0;
 
-        interact(card)
-            .draggable({
-                // ❗️ ФІКС БАГУ: Це має змусити Telegram "віддати" нам дотик
-                preventDefault: 'always',
+        // Ініціалізуємо Hammer.js
+        const hammer = new Hammer(card);
+
+        // Включаємо "pan" (свайп) у всіх напрямках
+        hammer.get('pan').set({ direction: Hammer.DIRECTION_ALL });
+
+        // Коли ми ТІЛЬКИ ТОРКНУЛИСЯ (початок руху)
+        hammer.on('panstart', function(ev) {
+            logToScreen('ДОТИК Є! (panstart)');
+            card.classList.add('is-dragging');
+            
+            // Запам'ятовуємо, звідки почали
+            startX = currentX;
+            startY = currentY;
+        });
+
+        // Коли ми РУХАЄМО пальцем
+        hammer.on('panmove', function(ev) {
+            // ev.deltaX/Y - це зсув від ПОЧАТКУ жесту
+            currentX = startX + ev.deltaX;
+            currentY = startY + ev.deltaY;
+
+            const rotate = currentX * 0.05;
+            
+            // Рухаємо картку
+            card.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) rotate(${rotate}deg)`;
+            
+            logToScreen(`РУХ: X=${currentX.toFixed(0)} Y=${currentY.toFixed(0)}`);
+        });
+
+        // Коли ми ВІДПУСТИЛИ палець
+        hammer.on('panend', function(ev) {
+            logToScreen('ВІДПУСТИВ! (panend)');
+            card.classList.remove('is-dragging');
+
+            const swipeThreshold = 100;
+            
+            // Аналізуємо ТІЛЬКИ горизонтальний зсув 'currentX'
+            if (Math.abs(currentX) > swipeThreshold) {
+                // Картка "відлітає"
+                const direction = currentX > 0 ? 1 : -1;
+                currentX = direction * 1000; // Кінцева позиція X
+                // currentY залишається тим, яким був
                 
-                inertia: true,
-                autoScroll: false,
+                card.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) rotate(${direction * 60}deg)`;
                 
-                onstart: function (event) {
-                    event.target.classList.add('is-dragging');
-                },
+                logToScreen(`РІШЕННЯ: ${direction > 0 ? 'ВПРАВО' : 'ВЛІВО'}`);
+                
+                setTimeout(() => {
+                    // Повертаємо (для тесту)
+                    currentX = 0;
+                    currentY = 0;
+                    card.style.transform = 'translate3d(0, 0, 0) rotate(0deg)';
+                    logToScreen('Чекаю на дотик...');
+                }, 1000);
 
-                // ❗️ ФІКС UX №2: Рухаємо картку вільно (з 'y')
-                onmove: function (event) {
-                    const target = event.target;
-                    
-                    x += event.dx;
-                    y += event.dy; // <-- Повертаємо рух по Y
-                    
-                    const rotate = x * 0.05;
-                    
-                    // Рухаємо картку в усіх напрямках
-                    target.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${rotate}deg)`;
-                },
+            } else {
+                // Повертаємо картку на місце
+                logToScreen('Повернення на місце...');
+                currentX = 0;
+                currentY = 0;
+                card.style.transform = 'translate3d(0, 0, 0) rotate(0deg)';
+                logToScreen('Чекаю на дотик...');
+            }
+        });
 
-                onend: function (event) {
-                    const target = event.target;
-                    target.classList.remove('is-dragging');
-
-                    const swipeThreshold = 100; // Порог свайпу
-                    
-                    // ❗️ ФІКС UX №3: Аналізуємо ТІЛЬКИ 'x'
-                    if (Math.abs(x) > swipeThreshold) {
-                        // Картка "відлітає"
-                        const direction = x > 0 ? 1 : -1;
-                        // ...але відлітає з тієї 'y' позиції, де її кинули
-                        target.style.transform = `translate3d(${direction * 1000}px, ${y}px, 0) rotate(${direction * 60}deg)`;
-                        
-                        console.log(`Рішення: ${direction > 0 ? 'ВПРАВО' : 'ВЛІВО'}`);
-                        
-                        setTimeout(() => {
-                            // Повертаємо картку (для тесту) і скидаємо ОБИДВІ координати
-                            x = 0;
-                            y = 0;
-                            target.style.transform = 'translate3d(0, 0, 0) rotate(0deg)';
-                        }, 1000);
-
-                    } else {
-                        // Повертаємо картку на місце (якщо свайп був слабкий або вертикальний)
-                        x = 0;
-                        y = 0;
-                        target.style.transform = 'translate3d(0, 0, 0) rotate(0deg)';
-                    }
-                }
-            });
     </script>
 </body>
 </html>
