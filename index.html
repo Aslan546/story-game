@@ -38,37 +38,50 @@
             align-items: center;
         }
 
-        /* ❗️ КРОК 2: Ми стилізуємо не <img>, а тег <i> (іконку) */
-        .stat-icon {
-            /* Ми просто міняємо розмір шрифту */
-            font-size: 30px; 
-            /* Іконки вже білі, але ми можемо керувати кольором */
-            color: #ffffff; 
-            /* Додамо тінь, як ми і хотіли */
-            text-shadow: 0 1px 1px rgba(0,0,0,0.5);
-            
-            /* Це важливо, щоб усі іконки займали однакове місце по висоті */
-            height: 32px; 
+        /* ❗️ НОВИЙ СТИЛЬ: Контейнер для іконки */
+        .stat-icon-container {
+            position: relative; /* База для нашарування */
+            font-size: 40px; /* ЗБІЛЬШИЛИ ІКОНКИ */
+            height: 42px; /* Фіксована висота */
+            width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .stat-bar-background {
+        /* ❗️ НОВИЙ СТИЛЬ: Іконка заднього фону (сіра) */
+        .stat-icon-bg {
+            color: #555; /* Темно-сірий, як "порожній" стан */
+            text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+            position: absolute; /* Всі іконки в одній точці */
+        }
+
+        /* ❗️ НОВИЙ СТИЛЬ: "Кліпер" - div, який обрізає білу іконку */
+        .stat-icon-fg-clipper {
+            position: absolute;
+            bottom: 0; /* Починаємо заповнення ЗНИЗУ */
+            left: 0;
             width: 100%;
-            height: 6px;
-            background-color: rgba(0, 0, 0, 0.3);
-            border-radius: 3px;
-            margin-top: 8px;
-            overflow: hidden;
+            height: 50%; /* ЦЕ І Є НАШ СТАТ (зараз 50%) */
+            overflow: hidden; /* МАГІЯ: все, що вище, ховається */
+            transition: height 0.3s ease; /* Плавна анімація */
         }
         
-        .stat-bar-progress {
-            width: 50%;
+        /* ❗️ НОВИЙ СТИЛЬ: Іконка переднього фону (біла) */
+        .stat-icon-fg {
+            color: #ffffff; /* Яскраво-білий "заповнений" стан */
+            text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+            
+            /* Важливо: ця іконка має ідеально 
+               співпадати з сірою під нею */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
             height: 100%;
-            background-color: #f0f0f0;
-            border-radius: 3px;
-            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
     </style>
@@ -78,30 +91,38 @@
     <div class="status-bar">
         
         <div class="stat" id="stat-study">
-            <i class="stat-icon fa-solid fa-brain"></i>
-            <div class="stat-bar-background">
-                <div class="stat-bar-progress" style="width: 50%;"></div>
+            <div class="stat-icon-container">
+                <i class="stat-icon-bg fa-solid fa-brain"></i>
+                <div class="stat-icon-fg-clipper" style="height: 50%;">
+                    <i class="stat-icon-fg fa-solid fa-brain"></i>
+                </div>
             </div>
         </div>
 
         <div class="stat" id="stat-energy">
-            <i class="stat-icon fa-solid fa-bolt"></i>
-            <div class="stat-bar-background">
-                <div class="stat-bar-progress" style="width: 50%;"></div>
+            <div class="stat-icon-container">
+                <i class="stat-icon-bg fa-solid fa-bolt"></i>
+                <div class="stat-icon-fg-clipper" style="height: 50%;">
+                    <i class="stat-icon-fg fa-solid fa-bolt"></i>
+                </div>
             </div>
         </div>
 
         <div class="stat" id="stat-money">
-            <i class="stat-icon fa-solid fa-hryvnia-sign"></i>
-            <div class="stat-bar-background">
-                <div class="stat-bar-progress" style="width: 50%;"></div>
+            <div class="stat-icon-container">
+                <i class="stat-icon-bg fa-solid fa-hryvnia-sign"></i>
+                <div class="stat-icon-fg-clipper" style="height: 50%;">
+                    <i class="stat-icon-fg fa-solid fa-hryvnia-sign"></i>
+                </div>
             </div>
         </div>
 
         <div class="stat" id="stat-rep">
-            <i class="stat-icon fa-solid fa-users"></i>
-            <div class="stat-bar-background">
-                <div class="stat-bar-progress" style="width: 50%;"></div>
+            <div class="stat-icon-container">
+                <i class="stat-icon-bg fa-solid fa-users"></i>
+                <div class="stat-icon-fg-clipper" style="height: 50%;">
+                    <i class="stat-icon-fg fa-solid fa-users"></i>
+                </div>
             </div>
         </div>
 
