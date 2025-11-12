@@ -14,17 +14,15 @@
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            overflow: hidden; /* Забороняємо прокрутку */
+            overflow: hidden; 
             user-select: none;
             display: flex;
             flex-direction: column;
             background-color: #444;
-            
-            /* ❗️ ФІКС БАГУ №1: Повністю відключаємо будь-які дотики на сторінці */
-            touch-action: none;
+            touch-action: none; /* Залишаємо це як додатковий захист */
         }
 
-        /* --- БАР СТАТІВ (без змін) --- */
+        /* --- БАР СТАТІВ --- */
         .status-bar {
             background-color: #1c1c1c;
             padding: 15px 10px;
@@ -43,21 +41,18 @@
         /* --- ГОЛОВНА СЦЕНА --- */
         .content-area {
             flex: 1;
-            padding: 20px 20px 10px 20px; /* Зменшив нижній відступ */
+            padding: 20px 20px 10px 20px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
             align-items: center;
-            
-            /* ❗️ ФІКС ДИЗАЙНУ №1: Рівномірно розподіляємо елементи */
             justify-content: space-around; 
-            
             position: relative;
             width: 100%;
         }
 
         .message-text {
-            font-size: 20px; /* Трохи менше, щоб влазило */
+            font-size: 20px;
             font-weight: 500;
             text-align: center;
             color: #f0f0f0;
@@ -65,18 +60,14 @@
             max-width: 340px;
         }
         
-        /* "Колода" карток */
         .card-stack {
             position: relative;
             width: 85vw; 
             max-width: 340px;
-            
-            /* ❗️ ФІКС ДИЗАЙНУ №2: Робимо картку довшою */
             height: 55vh;
-            max-height: 450px; /* Новий макс. розмір */
+            max-height: 450px; 
         }
 
-        /* Картка */
         .card {
             position: absolute;
             width: 100%;
@@ -84,7 +75,7 @@
             background-color: #3a4a44; 
             border-radius: 20px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-            touch-action: none; /* Кажемо браузеру не чіпати цю картку */
+            touch-action: none; /* Забороняємо браузеру чіпати картку */
             transition: transform 0.3s ease-out;
             display: flex;
             align-items: center;
@@ -105,7 +96,7 @@
             color: #f0f0f0;
         }
 
-        /* --- НИЖНІЙ БАР (без змін) --- */
+        /* --- НИЖНІЙ БАР --- */
         .footer-bar {
             background-color: #1c1c1c;
             padding: 15px;
@@ -159,10 +150,16 @@
         window.Telegram.WebApp.ready();
         
         const card = document.getElementById('current-card');
-        let x = 0; // Зберігаємо ТІЛЬКИ зсув по X
+        
+        // ❗️ ФІКС UX №1: Повертаємо 'y'
+        let x = 0;
+        let y = 0;
 
         interact(card)
             .draggable({
+                // ❗️ ФІКС БАГУ: Це має змусити Telegram "віддати" нам дотик
+                preventDefault: 'always',
+                
                 inertia: true,
                 autoScroll: false,
                 
@@ -170,40 +167,45 @@
                     event.target.classList.add('is-dragging');
                 },
 
-                // ❗️ ФІКС БАГУ №2: Ми ігноруємо 'dy' і відстежуємо 'dx'
+                // ❗️ ФІКС UX №2: Рухаємо картку вільно (з 'y')
                 onmove: function (event) {
                     const target = event.target;
                     
-                    x += event.dx; // Додаємо тільки зсув по X
-                    const rotate = x * 0.05; // Нахил залежить тільки від X
+                    x += event.dx;
+                    y += event.dy; // <-- Повертаємо рух по Y
                     
-                    // Рухаємо картку (по Y = 0)
-                    target.style.transform = `translate3d(${x}px, 0, 0) rotate(${rotate}deg)`;
+                    const rotate = x * 0.05;
+                    
+                    // Рухаємо картку в усіх напрямках
+                    target.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${rotate}deg)`;
                 },
 
-                // ❗️ ФІКС БАГУ №3: Логіка кінця руху теж дивиться тільки на X
                 onend: function (event) {
                     const target = event.target;
                     target.classList.remove('is-dragging');
 
                     const swipeThreshold = 100; // Порог свайпу
                     
+                    // ❗️ ФІКС UX №3: Аналізуємо ТІЛЬКИ 'x'
                     if (Math.abs(x) > swipeThreshold) {
                         // Картка "відлітає"
                         const direction = x > 0 ? 1 : -1;
-                        // Ми примусово ставимо Y=0
-                        target.style.transform = `translate3d(${direction * 1000}px, 0, 0) rotate(${direction * 60}deg)`;
+                        // ...але відлітає з тієї 'y' позиції, де її кинули
+                        target.style.transform = `translate3d(${direction * 1000}px, ${y}px, 0) rotate(${direction * 60}deg)`;
                         
                         console.log(`Рішення: ${direction > 0 ? 'ВПРАВО' : 'ВЛІВО'}`);
                         
                         setTimeout(() => {
-                            x = 0; // Скидаємо X
+                            // Повертаємо картку (для тесту) і скидаємо ОБИДВІ координати
+                            x = 0;
+                            y = 0;
                             target.style.transform = 'translate3d(0, 0, 0) rotate(0deg)';
                         }, 1000);
 
                     } else {
-                        // Повертаємо картку на місце
+                        // Повертаємо картку на місце (якщо свайп був слабкий або вертикальний)
                         x = 0;
+                        y = 0;
                         target.style.transform = 'translate3d(0, 0, 0) rotate(0deg)';
                     }
                 }
