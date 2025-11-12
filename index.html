@@ -23,17 +23,54 @@
             touch-action: none;
         }
 
-        /* --- БАР СТАТІВ (без змін) --- */
-        .status-bar { background-color: #1c1c1c; padding: 15px 10px; box-sizing: border-box; display: flex; justify-content: space-around; position: relative; z-index: 10; }
+        /* --- БАР СТАТІВ --- */
+        .status-bar {
+            background-color: #1c1c1c;
+            /* ❗️ ФІКС ДИЗАЙНУ №1: Збільшуємо верхній бар */
+            padding: 20px 10px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-around;
+            position: relative;
+            z-index: 10;
+        }
         .stat { width: 20%; display: flex; flex-direction: column; align-items: center; }
         .stat-icon-container { position: relative; font-size: 40px; height: 42px; width: 100%; display: flex; align-items: center; justify-content: center; }
         .stat-icon-bg { color: #555; text-shadow: 0 1px 1px rgba(0,0,0,0.5); position: absolute; }
         .stat-icon-fg { color: #ffffff; text-shadow: 0 1px 1px rgba(0,0,0,0.5); position: absolute; clip-path: inset(50% 0 0 0); transition: clip-path 0.3s ease; }
 
-        /* --- ГОЛОВНА СЦЕННА (без змін) --- */
-        .content-area { flex: 1; padding: 20px 20px 10px 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: space-around; position: relative; width: 100%; }
-        .message-text { font-size: 20px; font-weight: 500; text-align: center; color: #f0f0f0; width: 100%; max-width: 340px; }
-        .card-stack { position: relative; width: 85vw; max-width: 340px; height: 55vh; max-height: 450px; }
+
+        /* --- ГОЛОВНА СЦЕНА --- */
+        .content-area {
+            flex: 1;
+            /* ❗️ ФІКС ДИЗАЙНУ №2: Опускаємо контент нижче */
+            padding: 40px 20px 10px 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around; 
+            position: relative;
+            width: 100%;
+        }
+
+        .message-text {
+            font-size: 20px;
+            font-weight: 500;
+            text-align: center;
+            color: #f0f0f0;
+            width: 100%;
+            max-width: 340px;
+        }
+        
+        .card-stack {
+            position: relative;
+            width: 85vw; 
+            max-width: 340px;
+            height: 55vh;
+            max-height: 450px; 
+        }
+
         .card {
             position: absolute;
             width: 100%;
@@ -41,9 +78,7 @@
             background-color: #3a4a44; 
             border-radius: 20px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-            /* ❗️ ВАЖЛИВО: Hammer.js вимагає цього */
             touch-action: pan-y;
-            
             transition: transform 0.3s ease-out;
             display: flex;
             align-items: center;
@@ -54,25 +89,16 @@
         .card-avatar { width: 100%; height: 100%; object-fit: cover; }
         .character-name { font-size: 18px; font-weight: bold; text-align: center; color: #f0f0f0; }
 
-        /* --- НИЖНІЙ БАР (без змін) --- */
-        .footer-bar { background-color: #1c1c1c; padding: 15px; box-sizing: border-box; text-align: center; position: relative; z-index: 10; }
-        .day-counter { font-size: 16px; font-weight: bold; color: #f0f0f0; }
-
-        /* ❗️ КРОК 2: ДОДАЄМО СТИЛІ ДЛЯ ДЕБАГ-ЛОГУ */
-        #debug-log {
-            position: fixed;
-            bottom: 60px; /* Над футером */
-            left: 0;
-            width: 100%;
-            background: rgba(0,0,0,0.5);
-            color: #fff;
-            font-size: 12px;
-            padding: 5px;
-            z-index: 999;
+        /* --- НИЖНІЙ БАР --- */
+        .footer-bar {
+            background-color: #1c1c1c;
+            padding: 15px;
+            box-sizing: border-box;
             text-align: center;
-            font-family: monospace;
-            display: none; /* Ми ввімкнемо його, якщо захочемо */
+            position: relative;
+            z-index: 10;
         }
+        .day-counter { font-size: 16px; font-weight: bold; color: #f0f0f0; }
 
     </style>
 </head>
@@ -99,95 +125,57 @@
         <div class="day-counter" id="day-counter">1 вересня</div>
     </footer>
     
-    <div id="debug-log">[Логи]</div>
-
     <script>
         window.Telegram.WebApp.ready();
         
         const card = document.getElementById('current-card');
-        const debugLog = document.getElementById('debug-log');
 
-        // ❗️ Вмикаємо дебаг-панель
-        debugLog.style.display = 'block';
-
-        // Функція для логування на екран
-        function logToScreen(message) {
-            debugLog.textContent = message;
-        }
-
-        logToScreen('Hammer.js завантажено. Чекаю на дотик...');
-
-        // Зберігаємо початкову позицію
         let startX = 0;
         let startY = 0;
-        
-        // Зберігаємо поточну позицію
         let currentX = 0;
         let currentY = 0;
 
-        // Ініціалізуємо Hammer.js
         const hammer = new Hammer(card);
-
-        // Включаємо "pan" (свайп) у всіх напрямках
         hammer.get('pan').set({ direction: Hammer.DIRECTION_ALL });
 
-        // Коли ми ТІЛЬКИ ТОРКНУЛИСЯ (початок руху)
         hammer.on('panstart', function(ev) {
-            logToScreen('ДОТИК Є! (panstart)');
             card.classList.add('is-dragging');
-            
-            // Запам'ятовуємо, звідки почали
             startX = currentX;
             startY = currentY;
         });
 
-        // Коли ми РУХАЄМО пальцем
         hammer.on('panmove', function(ev) {
-            // ev.deltaX/Y - це зсув від ПОЧАТКУ жесту
             currentX = startX + ev.deltaX;
             currentY = startY + ev.deltaY;
-
             const rotate = currentX * 0.05;
-            
-            // Рухаємо картку
             card.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) rotate(${rotate}deg)`;
-            
-            logToScreen(`РУХ: X=${currentX.toFixed(0)} Y=${currentY.toFixed(0)}`);
         });
 
-        // Коли ми ВІДПУСТИЛИ палець
         hammer.on('panend', function(ev) {
-            logToScreen('ВІДПУСТИВ! (panend)');
             card.classList.remove('is-dragging');
-
             const swipeThreshold = 100;
             
-            // Аналізуємо ТІЛЬКИ горизонтальний зсув 'currentX'
             if (Math.abs(currentX) > swipeThreshold) {
                 // Картка "відлітає"
                 const direction = currentX > 0 ? 1 : -1;
-                currentX = direction * 1000; // Кінцева позиція X
-                // currentY залишається тим, яким був
+                currentX = direction * 1000;
                 
                 card.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) rotate(${direction * 60}deg)`;
                 
-                logToScreen(`РІШЕННЯ: ${direction > 0 ? 'ВПРАВО' : 'ВЛІВО'}`);
+                console.log(`Рішення: ${direction > 0 ? 'ВПРАВО' : 'ВЛІВО'}`);
                 
                 setTimeout(() => {
                     // Повертаємо (для тесту)
                     currentX = 0;
                     currentY = 0;
                     card.style.transform = 'translate3d(0, 0, 0) rotate(0deg)';
-                    logToScreen('Чекаю на дотик...');
                 }, 1000);
 
             } else {
                 // Повертаємо картку на місце
-                logToScreen('Повернення на місце...');
                 currentX = 0;
                 currentY = 0;
                 card.style.transform = 'translate3d(0, 0, 0) rotate(0deg)';
-                logToScreen('Чекаю на дотик...');
             }
         });
 
